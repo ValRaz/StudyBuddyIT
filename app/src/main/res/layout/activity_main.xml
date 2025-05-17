@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/textViewQuestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Question"
+        android:textSize="24sp"
+        android:textAlignment="center"
+        android:padding="16dp" />
+
+    <TextView
+        android:id="@+id/textViewAnswer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Answer"
+        android:textSize="20sp"
+        android:textStyle="italic"
+        android:textAlignment="center"
+        android:padding="16dp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/buttonShowAnswer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show Answer"
+        android:layout_marginTop="24dp" />
+
+    <Button
+        android:id="@+id/buttonNextCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Next Card"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/buttonAddCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add New Card"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>
