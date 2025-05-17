@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun FlashcardScreen(modifier: Modifier = Modifier) {
-    // 1. Hold a mutable list of sample flashcards in Compose state
+    //Holds mutable list of flashcards
     val flashcards = remember {
         mutableStateListOf(
             Flashcard("What is Kotlin?", "A modern JVM language."),
@@ -49,7 +49,7 @@ fun FlashcardScreen(modifier: Modifier = Modifier) {
             Flashcard("Who wrote '1984'?", "George Orwell")
         )
     }
-    // 2. Track the current card index and whether to show the answer
+    // Tracks current card index and answer visibility
     var currentCardIndex by remember { mutableStateOf(0) }
     var showAnswer by remember { mutableStateOf(false) }
 
@@ -58,14 +58,14 @@ fun FlashcardScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Display the question
+        // Displays the question
         Text(
             text = flashcards[currentCardIndex].question,
             fontSize = 24.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Conditionally display the answer
+        // Displays answer when toggled.
         if (showAnswer) {
             Text(
                 text = flashcards[currentCardIndex].answer,
@@ -76,7 +76,7 @@ fun FlashcardScreen(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Row of “Show/Hide Answer” and “Next Card” buttons
+        // Displays the row of buttons
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Button(onClick = { showAnswer = !showAnswer }) {
                 Text(if (showAnswer) "Hide Answer" else "Show Answer")
@@ -103,7 +103,6 @@ fun FlashcardScreen(modifier: Modifier = Modifier) {
 @Composable
 fun FlashcardScreenPreview() {
     StudyBuddyITTheme {
-        // You can pass a simple Modifier to see padding
         FlashcardScreen(modifier = Modifier.padding(16.dp))
     }
 }
