@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,37 +54,61 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppContent() {
-    // Obtain a Context for launching activities and showing toasts
+    // Gets a Context for SharedPreferences, activity launching, ect.
     val context = LocalContext.current
 
-    // Holds mutable list of flashcards in memory
+    // Loads saved flashcards or empty list
     val flashcards = remember {
-        mutableStateListOf(
-            Flashcard("What is Kotlin?", "A modern JVM language."),
-            Flashcard("Capital of Italy?", "Rome"),
-            Flashcard("Who wrote '1984'?", "George Orwell")
-        )
+        mutableStateListOf<Flashcard>().apply {
+            addAll(FlashcardStorage.loadFlashcards(context))
+        }
     }
 
-    // Tracks current card index and answer visibility
-    var currentCardIndex by remember { mutableStateOf(0) }
-    var showAnswer by remember { mutableStateOf(false) }
-
-    // Launcher to open AddFlashcardActivity and get results back
+    // Preps launcher for the AddFlashcard Activity
     val addCardLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data = result.data
-            val q = data?.getStringExtra("QUESTION_KEY").orEmpty()
-            val a = data?.getStringExtra("ANSWER_KEY").orEmpty()
+            val q    = data?.getStringExtra("QUESTION_KEY").orEmpty()
+            val a    = data?.getStringExtra("ANSWER_KEY").orEmpty()
             if (q.isNotBlank() && a.isNotBlank()) {
+                // Add to list and persist immediately
                 flashcards.add(Flashcard(q, a))
-                currentCardIndex = flashcards.lastIndex
-                showAnswer = false
+                FlashcardStorage.saveFlashcards(context, flashcards)
             }
         }
     }
+
+    //Checks for empty list and displays please add message
+    if (flashcards.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment   = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text      = "No Cards\nPlease add flashcards",
+                fontSize  = 20.sp,
+                lineHeight= 28.sp,
+                textAlign = TextAlign.Center,
+                modifier  = Modifier.padding(bottom = 24.dp)
+            )
+            Button(onClick = {
+                val intent = Intent(context, AddFlashcardActivity::class.java)
+                addCardLauncher.launch(intent)
+            }) {
+                Text("Add First Card")
+            }
+        }
+        return
+    }
+
+    //Index and answer toggle tracking for existing cards
+    var currentCardIndex by remember { mutableStateOf(0) }
+    var showAnswer       by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -120,6 +145,27 @@ fun FlashcardScreen(
     onAddCard: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (flashcards.isEmpty()) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "No Cards\nPlease add flashcards",
+                fontSize = 20.sp,
+                lineHeight = 28.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+            Button(onClick = onAddCard) {
+                Text("Add First Card")
+            }
+        }
+        return
+    }
 
     Column(
         modifier = modifier.fillMaxSize(),
