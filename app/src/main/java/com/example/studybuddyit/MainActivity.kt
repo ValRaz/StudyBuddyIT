@@ -10,11 +10,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -36,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.studybuddyit.ui.theme.StudyBuddyITTheme
+import androidx.compose.material3.Card
 
 // Simple data class for a flashcard
 data class Flashcard(val question: String, val answer: String)
@@ -73,7 +76,6 @@ fun AppContent() {
             val q    = data?.getStringExtra("QUESTION_KEY").orEmpty()
             val a    = data?.getStringExtra("ANSWER_KEY").orEmpty()
             if (q.isNotBlank() && a.isNotBlank()) {
-                // Add to list and persist immediately
                 flashcards.add(Flashcard(q, a))
                 FlashcardStorage.saveFlashcards(context, flashcards)
             }
@@ -137,7 +139,7 @@ fun AppContent() {
 
 @Composable
 fun FlashcardScreen(
-    flashcards: List<Flashcard>,
+    flashcards: MutableList<Flashcard>,
     currentIndex: Int,
     showAnswer: Boolean,
     onToggleAnswer: () -> Unit,
@@ -145,6 +147,7 @@ fun FlashcardScreen(
     onAddCard: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     if (flashcards.isEmpty()) {
         Column(
             modifier = modifier
@@ -172,12 +175,30 @@ fun FlashcardScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Displays the question
-        Text(
-            text = flashcards[currentIndex].question,
-            fontSize = 24.sp,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        // Wrap the question/answer in a Card so long press can be used to delete a card
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+                .combinedClickable(
+                    onClick = {},
+                    onLongClick = {
+                        // Remove the current card
+                        flashcards.removeAt(currentIndex)
+                        // Save updated flashcard list
+                        FlashcardStorage.saveFlashcards(context, flashcards)
+                    }
+                )
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Q: ${flashcards[currentIndex].question}")
+                if (showAnswer) {
+                    Text("A: ${flashcards[currentIndex].answer}")
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Displays answer when toggled.
         if (showAnswer) {
@@ -190,13 +211,27 @@ fun FlashcardScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Displays the row of buttons
+        // Displays the row of buttons including randomization for shuffle
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Button(onClick = onToggleAnswer) {
                 Text(if (showAnswer) "Hide Answer" else "Show Answer")
             }
             Button(onClick = onNextCard) {
                 Text("Next Card")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Button(onClick = {
+                flashcards.shuffle()
+                FlashcardStorage.saveFlashcards(context, flashcards)
+            }) {
+                Text("Shuffle")
             }
         }
 
@@ -214,7 +249,7 @@ fun FlashcardScreen(
 fun FlashcardScreenPreview() {
     StudyBuddyITTheme {
         FlashcardScreen(
-            flashcards = listOf(Flashcard("Preview Q?", "Preview A")),
+            flashcards = mutableListOf(Flashcard("Preview Q?", "Preview A")),
             currentIndex = 0,
             showAnswer = true,
             onToggleAnswer = {},
