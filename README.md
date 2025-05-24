@@ -19,8 +19,7 @@ Jetpack Compose for UI, Material 3 theming, and simple on-device persistence via
 - **IDE:** Android Studio
 - **Language:** Kotlin
 - **UI Toolkit:** Jetpack Compose (Material 3)
-- **Persistence:** Android `SharedPreferences` with [Gson](https://github.com/google/gson) for 
-- JSON serialization
+- **Persistence:** Android `SharedPreferences` with [Gson](https://github.com/google/gson) for JSON serialization
 - **Testing:** JUnit4 for local JVM tests 
 - **Build System:** Gradle Kotlin DSL
 
