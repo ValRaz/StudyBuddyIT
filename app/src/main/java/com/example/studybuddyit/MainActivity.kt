@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,13 +34,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.studybuddyit.ui.theme.StudyBuddyITTheme
-import androidx.compose.material3.Card
 
 // Simple data class for a flashcard
 data class Flashcard(val question: String, val answer: String)
@@ -126,9 +128,18 @@ fun AppContent() {
                 currentCardIndex = (currentCardIndex + 1) % flashcards.size
                 showAnswer = false
             },
+            // Adds a new flashcard
             onAddCard = {
                 val intent = Intent(context, AddFlashcardActivity::class.java)
                 addCardLauncher.launch(intent)
+            },
+            //Deletes a card, resets index, and keeps persistent change
+            onDeleteCard = {
+                flashcards.removeAt(currentCardIndex)
+                FlashcardStorage.saveFlashcards(context, flashcards)
+                currentCardIndex = if (flashcards.isEmpty()) 0
+                    else currentCardIndex.coerceAtMost(flashcards.lastIndex)
+                showAnswer = false
             },
             modifier = Modifier
                 .padding(innerPadding)
@@ -145,6 +156,7 @@ fun FlashcardScreen(
     onToggleAnswer: () -> Unit,
     onNextCard: () -> Unit,
     onAddCard: () -> Unit,
+    onDeleteCard: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -177,16 +189,18 @@ fun FlashcardScreen(
     ) {
         // Wrap the question/answer in a Card so long press can be used to delete a card
         Card(
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White,
+                contentColor   = Color.Black
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
                 .combinedClickable(
                     onClick = {},
                     onLongClick = {
-                        // Remove the current card
-                        flashcards.removeAt(currentIndex)
-                        // Save updated flashcard list
-                        FlashcardStorage.saveFlashcards(context, flashcards)
+                        onDeleteCard()
                     }
                 )
         ) {
@@ -255,6 +269,7 @@ fun FlashcardScreenPreview() {
             onToggleAnswer = {},
             onNextCard = {},
             onAddCard = {},
+            onDeleteCard   = {},
             modifier = Modifier.padding(16.dp)
         )
     }
